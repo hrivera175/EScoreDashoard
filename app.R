@@ -10,6 +10,10 @@ options(RCHART_LIB = 'nvd3')
 
 dat <- read.csv('atd3 copy.csv',header=T)
 
+#Jake: 005a0000009vOgEAAU
+#Daniel: 005a0000007WUKlAAO
+#Steven: 0051400000BAArsAAH
+#Aaron: 0051400000BB4YEAA1
 
 dat4 <- dat[,c(1,3,22)]
 dat4$e_score <- dat4$e_score*100
@@ -17,7 +21,7 @@ dat4$diff <- (100 - dat4$e_score)
 dat5 <- melt(dat4, id=c('email','date'))
 dat5 <- dat5[order(dat5$email,dat5$date,dat5$variable),]
 dat5$ymin[dat5$variable=='e_score'] <- 0
-dat5 <- setDT(dat5)[dat5$variable=='diff', ymin:=1-value, by=list(email,date)]
+dat5 <- setDT(dat5)[dat5$variable=='diff', ymin:=100-value, by=list(email,date)]
 
 dat5 <- setDT(dat5)[dat5$variable=='e_score', ymax := value, by=list(email,date)]
 dat5 <- setDT(dat5)[dat5$variable=='diff', ymax:=value+ymin, by=list(email,date)]
@@ -25,7 +29,7 @@ dat5 <- data.frame(dat5)
 
 dat5 <- subset(dat5, email =='211sandiego.org' | email =='211tampabay.org' |email == 'ltech.com' |email == 'evergage.com')
 dat5 <- setDT(dat5)[ variable == 'e_score', ymin:=0,by=list(email,date,variable)]
-dat5 <- setDT(dat5)[ variable=='diff' , ymin:= dat5$value[1] - dat5$ymin[1],by=list(email,date)]
+#dat5 <- setDT(dat5)[ variable=='diff' , ymin:= dat5$value[1] - dat5$ymin[1],by=list(email,date)]
 dat5$date <- as.character(dat5$date)
 
 dat2 <- subset(dat, email =='211sandiego.org' | email =='211tampabay.org'| email =='ltech.com' | email =='evergage.com')
@@ -59,7 +63,7 @@ sidebar2 <-    dashboardSidebar()
 body     <-    dashboardBody(uiOutput('body'))
 
 mainbody <-    div(fluidRow(
-                           
+      useShinyjs(),                     
       tabBox(
         title = " ",
         # The id lets us use input$tabset1 on the server to find the current tab
@@ -70,12 +74,13 @@ mainbody <-    div(fluidRow(
                  selectInput('Select2', 'AE', choices = c('Daniel','Jake','Aaron','Steven','Chris','Noah')),
                  selectInput('Select', 'Customer:', choices = unique(as.character(dat5$email))),
                  #uiOutput('thirdSelection'),
-                 br()
+                 br(),
+                 actionButton('go','Go')
                 ),
         tabPanel("Customer Dashboard", " ", value = 2,
                  
     fluidRow(
-      box(title='Engagement Score', 'text', width=4, height=450, showOutput("distPlot",lib= 'nvd3')),
+      box(title='Engagement Score', width=4, height=450, plotOutput("distPlot")),
       #box(htmlOutput("distPlot")),
       box(plotOutput('overtime'),width=8, height = 450),
     fluidRow(
@@ -100,7 +105,6 @@ server <- shinyServer(function(input, output,session) {
         if (input$Login > 0) {
           username <- isolate(input$userName)
           password <- isolate(input$passwd)
-          #Id.username <- which(my_username == Username)
           if (username == "user" & password == "test") {
             USER$Logged <<- TRUE
             USER$LoginPass <<- 1
@@ -113,7 +117,7 @@ server <- shinyServer(function(input, output,session) {
   
   output$body <- renderUI({
     if (USER$Logged == TRUE) {
-      mainbody
+      mainbody 
     }
     else {
       if(USER$LoginPass >= 0) {
@@ -124,7 +128,12 @@ server <- shinyServer(function(input, output,session) {
       }
     }
   })
-
+  
+  output$go <- renderUI({
+    if(output$go==1){
+      input$tabset1 == 2
+    }
+  })
   
   output$secondSelection <- renderUI({
     if (!is.null(input$tabset1) && input$tabset1 == 2) {
@@ -138,12 +147,22 @@ server <- shinyServer(function(input, output,session) {
   #})
   
   
-  output$distPlot <- renderChart({
+  output$distPlot <- renderPlot({
     dat1 <- subset(dat5, (email %in% input$Select & date %in% input$User))
-    p5 <- nPlot(value ~ variable, data = dat1 , type = 'pieChart')
-    p5$chart(donut = TRUE, color=c('#33FF00','#CCCCCC'), margin=list(left=10,right = 10),width = 320,height=300,showLegend=F)
-    p5$set(dom = 'distPlot')
-    return(p5)
+    ggplot(dat1, aes(fill=variable, ymax=ymax, ymin=ymin, xmax=4, xmin=3)) +
+      geom_rect(colour="white",show_guide=F) +
+      coord_polar(theta="y") +
+      geom_text(aes(x = 0, y = 0,label = round(value[1])),size=15) +
+      xlim(c(0, 4)) +
+      theme_bw() +
+      theme(panel.grid=element_blank()) +
+      theme(panel.border=element_blank()) +
+      theme(axis.text=element_blank()) +
+      theme(axis.ticks=element_blank()) +
+      scale_fill_manual(values=c('#33FF00','#CCCCCC')) +
+      xlab("") +
+      ylab("") +
+      labs(title=paste0("Engagement Score for: ",input$Select,'\n', " as of: ", input$User))
       }) 
   
   #output$distPlot <- renderGvis({
@@ -228,4 +247,6 @@ server <- shinyServer(function(input, output,session) {
   
 })
   shinyApp(ui = ui, server = server)
+  
+  deployApp("~/BitTorrent Sync/CR Data/Hillary's Scripts/EngagementPipelineRealTime/ScoreApp")
   
