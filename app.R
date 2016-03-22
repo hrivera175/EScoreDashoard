@@ -8,12 +8,7 @@ library(shinyjs)
 
 dat <- read.csv('atd.csv',header=T)
 
-#Jake: 005a0000009vOgEAAU
-#Daniel: 005a0000007WUKlAAO
-#Steven: 0051400000BAArsAAH
-#Aaron: 0051400000BB4YEAA1
-#Chris: 0051400000Bbynk
-#Noah: 0051400000BmKq2
+
 
 dat4 <- dat[,c('email','date','e_score','account')]
 dat4$e_score <- dat4$e_score*100
@@ -31,18 +26,18 @@ dat5 <- setDT(dat5)[ variable == 'e_score', ymin:=0,by=list(email,date,variable)
 #dat5 <- setDT(dat5)[ variable=='diff' , ymin:= dat5$value[1] - dat5$ymin[1],by=list(email,date)]
 dat5$date <- as.character(dat5$date)
 dat5$owner <- ' '
-dat5$owner[dat5$account == '005a0000009vOgEAAU'] <- 'Jake Holt'
-dat5$owner[dat5$account == '005a0000007WUKlAAO'] <- 'Daniel Gomez'
-dat5$owner[dat5$account == '0051400000BczETAAZ'] <- 'Wyatt Dryja'
-dat5$owner[dat5$account == '0051400000BB4YEAA1'] <- 'Aaron Riley'
-dat5$owner[dat5$account == '0051400000BabpRAAR'] <- 'Alex Brown'
-dat5$owner[dat5$account == '0051400000BbO0NAAV'] <- 'James Buckley'
-dat5$owner[dat5$account == '0051400000BcqWnAAJ'] <- 'Stephen Jobe'
-dat5$owner[dat5$account == '00530000004CrKaAAK'] <- 'Ryan Huff'
-dat5$owner[dat5$account == '00530000004phnmAAA'] <- 'Brandon Bruce'
-dat5$owner[dat5$account == '005a0000007WOViAAO'] <- 'Jason Hubbard'
-dat5$owner[dat5$account == '005a000000Ah2NNAAZ'] <- 'Zach Meadors'
-dat5$owner[dat5$account == '005a000000B8sqlAAB'] <- 'Geoff Bokuniewicz'
+dat5$owner[dat5$account == '005a0000009vOgEAAU'] <- 'Jake'
+dat5$owner[dat5$account == '005a0000007WUKlAAO'] <- 'Daniel'
+dat5$owner[dat5$account == '0051400000BczETAAZ'] <- 'Wyatt'
+dat5$owner[dat5$account == '0051400000BB4YEAA1'] <- 'Aaron'
+dat5$owner[dat5$account == '0051400000BabpRAAR'] <- 'Alex'
+dat5$owner[dat5$account == '0051400000BbO0NAAV'] <- 'James'
+dat5$owner[dat5$account == '0051400000BcqWnAAJ'] <- 'Stephen'
+dat5$owner[dat5$account == '00530000004CrKaAAK'] <- 'Ryan'
+dat5$owner[dat5$account == '00530000004phnmAAA'] <- 'Brandon'
+dat5$owner[dat5$account == '005a0000007WOViAAO'] <- 'Jason'
+dat5$owner[dat5$account == '005a000000Ah2NNAAZ'] <- 'Zach'
+dat5$owner[dat5$account == '005a000000B8sqlAAB'] <- 'Geoff'
 
 
 dat2 <- dat
